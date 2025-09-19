@@ -1,0 +1,59 @@
+Q.1) Write an SQL query to fetch only odd rows from the table?
+
+WITH numbered AS (
+    SELECT 
+        t.*,
+        ROW_NUMBER() OVER (ORDER BY id) AS rn
+    FROM my_table t
+)
+SELECT *
+FROM numbered
+WHERE rn % 2 = 1;
+
+
+Q.2 ) Write an SQL query to find the nth highest salary from table
+
+WITH Ranked AS (
+    SELECT 
+        salary,
+        ROW_NUMBER() OVER (ORDER BY salary DESC) AS rn
+    FROM Employees
+)
+SELECT salary
+FROM Ranked
+WHERE rn = N;
+
+Q.3 ) Difference between Primary Key and Unique Key ?
+
+🔑 Primary Key
+Definition: A column (or set of columns) that uniquely identifies each row in a table.
+Properties:
+Uniqueness → No two rows can have the same primary key value.
+Not Null → Primary key columns cannot contain NULL values.
+One per table → A table can have only one primary key (though it can be composite, meaning multiple columns combined).
+Automatically creates a clustered index in most databases (SQL Server, MySQL).
+
+🔑 Unique Key
+Definition: A constraint that ensures all values in a column (or set of columns) are unique across rows.
+Properties:
+Uniqueness → No duplicate values allowed.
+NULL allowed → Unlike primary key, a unique key column can contain NULL values (but only one NULL in SQL Server, multiple NULLs in Oracle/MySQL/Postgres).
+Multiple per table → A table can have many unique keys.
+Usually creates a non-clustered index.
+
+Q.4) Find all unique elements and their frequency in a given String in O(n)
+
+s = "programming"
+freq = {}
+
+for ch in s:                     # loop over each character
+    if ch in freq:                # if already in dict, increment
+        freq[ch] += 1
+    else:                         # if not, add with count 1
+        freq[ch] = 1
+
+print("Frequencies:", freq)
+
+
+
+
