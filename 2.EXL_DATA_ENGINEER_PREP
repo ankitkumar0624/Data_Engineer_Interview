@@ -1,0 +1,507 @@
+Q.GURUGRAM ) 
+Interview was good. The interviewer was nice. The questions asked were pretty basic.
+Python,SQL and Spark.Mostly theoretical questions were asked. 
+One python code was asked to fetch unique letters of a string
+Interview questions [1]
+Question 1
+
+>>>>>>>>> Explain the normalisation methods in SQL
+
+Normalization in SQL is the process of reducing redundancy and improving consistency.
+1NF removes repeating groups and ensures atomic values.
+2NF removes partial dependency on part of a composite key.
+3NF removes transitive dependency between non-key attributes.
+BCNF ensures every determinant is a candidate key.
+Higher forms like 4NF and 5NF handle multi-valued and join dependencies.
+This makes queries efficient and avoids anomalies.
+
+>>>>>>>>> One python code was asked to fetch unique letters of a string”
+
+Method 1: Using set (fastest)
+s = "programming"
+unique_letters = set(s)
+print(unique_letters)
+👉 Output (unordered):
+{'o', 'g', 'a', 'r', 'i', 'p', 'm', 'n'}
+
+🔹 Method 2: Keep order of appearance
+s = "programming"
+unique_letters = ""
+for ch in s:
+    if ch not in unique_letters:   # check if already added
+        unique_letters += ch
+print(unique_letters)
+👉 Output:
+progamin
+
+🔹 Method 3: With dictionary (frequency + uniqueness)
+s = "programming"
+freq = {}
+for ch in s:
+    freq[ch] = freq.get(ch, 0) + 1
+print("Unique letters:", [k for k, v in freq.items() if v == 1])
+👉 Output:
+Unique letters: ['o', 'a', 'i', 'n']
+
+Q.) Architecture based questions, technical aspects of optimisation as well as understanding of data modelling aspects.
+    Tried to delve deeper into the working of batch and stream data processing as well as relevant database design
+    Interview questions [1]
+    Question 1
+    Mainly focussed on big data, pyspark, orchestration and SQL queries based on joins as well as ranking, partitions. 
+
+Q.) Sql ,Adf and spark questions
+
+Q.) about your self 2.project describe 3.5-6 SQL queries (union, window function etc ) 4.azure cloud (Triggers IR etc)
+
+Q.) Python ,SQl based and architecture based questions
+
+Q.) 1st round: Live SQL Coding + GCP Multiple choice questions -
+    Total 4 questions, 2nd round: Python, GCP, SQL, Spark questions with discussions on past projects 
+    and technologies. Both the rounds were of 30 minute duration.
+
+Q.) The interview was easy, basic questions related to Sql, Spark and Python were asked. 
+    There were 2 technical rounds and 1 with the manager. 
+    In the managerial round, there were normal questions around my experience in current company.
+
+Q.) How will you eliminate duplicate records
+
+1. In SQL
+
+Suppose we have a table Employees:
+
+emp_id	name	dept_id
+1	Alice	10
+1	Alice	10
+2	Bob	20
+3	Charlie	30
+3	Charlie	30
+a) Using DISTINCT
+SELECT DISTINCT emp_id, name, dept_id
+FROM Employees;
+
+b) Using ROW_NUMBER() (keep first occurrence)
+WITH ranked AS (
+  SELECT *,
+         ROW_NUMBER() OVER (PARTITION BY emp_id, name, dept_id ORDER BY emp_id) AS rn
+  FROM Employees
+)
+SELECT emp_id, name, dept_id
+FROM ranked
+WHERE rn = 1;
+
+c) Delete duplicates (keep only one row)
+DELETE FROM Employees
+WHERE rowid NOT IN (
+    SELECT MIN(rowid)
+    FROM Employees
+    GROUP BY emp_id, name, dept_id
+);
+
+
+Q.1) What is the difference between managed tables and external table ?
+
+CREATE TABLE managed_table (
+    id INT,
+    name STRING
+);
+CREATE EXTERNAL TABLE external_table (
+    id INT,
+    name STRING
+)
+LOCATION '/data/external/table/';
+
+In Databricks, a managed table’s data is stored inside the default DBFS warehouse location, and dropping it removes both the schema and the data. 
+An external table stores data at a user-defined path (like ADLS, S3, or DBFS mount), and dropping it only removes the schema — the underlying data remains
+
+Explode Function (PySpark)
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import explode
+
+spark = SparkSession.builder.getOrCreate()
+
+data = [(1, ["apple", "banana", "mango"]),
+        (2, ["grapes", "orange"])]
+
+df = spark.createDataFrame(data, ["id", "fruits"])
+df.show(truncate=False)
+
++---+------------------------+
+|id |fruits                  |
++---+------------------------+
+|1  |[apple, banana, mango]  |
+|2  |[grapes, orange]        |
++---+------------------------+
+
+
+df_exploded = df.withColumn("fruit", explode("fruits"))
+df_exploded.show()
+
+
++---+------------------------+------+
+|id |fruits                  |fruit |
++---+------------------------+------+
+|1  |[apple, banana, mango]  |apple |
+|1  |[apple, banana, mango]  |banana|
+|1  |[apple, banana, mango]  |mango |
+|2  |[grapes, orange]        |grapes|
+|2  |[grapes, orange]        |orange|
++---+------------------------+------+
+
+Window Functions
+
+
+Suppose you want to find sales rank per region:
+
+from pyspark.sql.window import Window
+from pyspark.sql.functions import rank
+
+data = [("North", "A", 100),
+        ("North", "B", 200),
+        ("South", "C", 150),
+        ("South", "D", 300)]
+
+df = spark.createDataFrame(data, ["region", "salesperson", "amount"])
+
+window_spec = Window.partitionBy("region").orderBy(df["amount"].desc())
+
+df.withColumn("rank", rank().over(window_spec)).show()
+
++------+-----------+------+----+
+|region|salesperson|amount|rank|
++------+-----------+------+----+
+|South |D          |300   |1   |
+|South |C          |150   |2   |
+|North |B          |200   |1   |
+|North |A          |100   |2   |
++------+-----------+------+----+
+
+groupBy
+
+Basic aggregation:
+
+df.groupBy("region").sum("amount").show()
+
++------+-----------+
+|region|sum(amount)|
++------+-----------+
+|South |450        |
+|North |300        |
++------+-----------+
+
+
+Q.2 ) They just asked some simple python questions like list comprehension, shell scripts experience and sql questions on joins ??
+
+List comprehension
+nums = [1,2,3,4,5]
+squares = [x*x for x in nums if x%2==0]   # [4,16]
+
+String & list operations
+reverse a string (s[::-1])
+remove duplicates (list(set(lst)))
+flatten a list of lists ([x for row in matrix for x in row])
+
+I’ll create small sample DataFrames and then show:
+Self Join
+Cartesian Join
+Left Anti Join
+Outer Join
+
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("JoinsExample").getOrCreate()
+
+# Employees Data
+employees = [(1, "Alice", 10),
+             (2, "Bob", 20),
+             (3, "Charlie", 10),
+             (4, "David", 30)]
+
+emp_df = spark.createDataFrame(employees, ["emp_id", "name", "dept_id"])
+
+# Departments Data
+departments = [(10, "HR"),
+               (20, "Finance"),
+               (40, "Marketing")]
+
+dept_df = spark.createDataFrame(departments, ["dept_id", "dept_name"])
+
+1. Self Join
+Find employees working in the same department.
+emp_df.alias("e1").join(
+    emp_df.alias("e2"),
+    on=( (emp_df.alias("e1").dept_id == emp_df.alias("e2").dept_id) & 
+         (emp_df.alias("e1").emp_id != emp_df.alias("e2").emp_id) )
+).select("e1.name", "e2.name", "e1.dept_id").show()
+
+
+Output:
++-------+-------+-------+
+|  name |  name |dept_id|
++-------+-------+-------+
+| Alice |Charlie|   10  |
+|Charlie| Alice |   10  |
++-------+-------+-------+
+
+🔹 2. Cartesian Join (Cross Join)
+All possible employee–department combinations.
+emp_df.crossJoin(dept_df).show()
+Output (truncated):
++------+-------+-------+-------+-----------+
+|emp_id|  name |dept_id|dept_id| dept_name |
++------+-------+-------+-------+-----------+
+|   1  | Alice |   10  |   10  | HR        |
+|   1  | Alice |   10  |   20  | Finance   |
+|   1  | Alice |   10  |   40  | Marketing |
+...
+
+🔹 3. Left Anti Join
+Find employees whose dept_id has no matching department.
+emp_df.join(dept_df, emp_df.dept_id == dept_df.dept_id, "left_anti").show()
+Output:
++------+-----+-------+
+|emp_id|name |dept_id|
++------+-----+-------+
+|  4   |David|  30   |
++------+-----+-------+
+
+
+👉 David belongs to dept_id 30, which doesn’t exist in departments.
+🔹 4. Outer Join (Full Outer)
+Keep all employees and all departments.
+emp_df.join(dept_df, emp_df.dept_id == dept_df.dept_id, "outer").show()
+Output:
++------+-------+-------+-------+-----------+
+|emp_id|  name |dept_id|dept_id| dept_name |
++------+-------+-------+-------+-----------+
+|   1  | Alice |  10   |  10   | HR        |
+|   2  | Bob   |  20   |  20   | Finance   |
+|   3  |Charlie|  10   |  10   | HR        |
+|   4  | David |  30   | null  | null      |
+|null  | null  | null  |  40   | Marketing |
++------+-------+-------+-------+-----------+
+
+
+1. Self Join
+Find employees in the same department (but not themselves).
+SELECT e1.name AS emp1,
+       e2.name AS emp2,
+       e1.dept_id
+FROM employees e1
+JOIN employees e2
+  ON e1.dept_id = e2.dept_id
+ AND e1.emp_id <> e2.emp_id;
+Result:
++-------+-------+-------+
+| emp1  | emp2  |dept_id|
++-------+-------+-------+
+| Alice |Charlie|   10  |
+|Charlie| Alice |   10  |
++-------+-------+-------+
+
+🔹 2. Cartesian Join (Cross Join)
+All combinations of employees × departments.
+SELECT *
+FROM employees
+CROSS JOIN departments;
+
+🔹 3. Left Anti Join
+Employees whose department has no matching record.
+SELECT e.*
+FROM employees e
+LEFT ANTI JOIN departments d
+  ON e.dept_id = d.dept_id;
+Result:
++------+-----+-------+
+|emp_id|name |dept_id|
++------+-----+-------+
+|  4   |David|  30   |
++------+-----+-------+
+
+🔹 4. Outer Join (Full Outer)
+Keep all employees and all departments.
+SELECT e.emp_id,
+       e.name,
+       e.dept_id AS emp_dept_id,
+       d.dept_id AS dept_dept_id,
+       d.dept_name
+FROM employees e
+FULL OUTER JOIN departments d
+  ON e.dept_id = d.dept_id;
+Result:
++------+-------+-------------+-------------+-----------+
+|emp_id|  name |emp_dept_id  |dept_dept_id | dept_name |
++------+-------+-------------+-------------+-----------+
+|   1  | Alice |     10      |     10      | HR        |
+|   2  | Bob   |     20      |     20      | Finance   |
+|   3  |Charlie|     10      |     10      | HR        |
+|   4  | David |     30      |    null     | null      |
+| null | null  |    null     |     40      | Marketing |
++------+-------+-------------+-------------+-----------+
+
+
+Q.3) SQL Joins and Python Loop
+
+QL Joins (Quick Reference with Example)
+
+Suppose we have:
+Employees table
+emp_id	name	dept_id
+1	Alice	10
+2	Bob	20
+3	Charlie	30
+Departments table
+dept_id	dept_name
+10	HR
+20	Finance
+40	Marketing
+
+1. INNER JOIN
+Return only matching records.
+SELECT e.name, d.dept_name
+FROM employees e
+INNER JOIN departments d
+  ON e.dept_id = d.dept_id;
+👉 Alice → HR, Bob → Finance.
+
+2. LEFT JOIN
+Keep all employees, show dept if exists.
+SELECT e.name, d.dept_name
+FROM employees e
+LEFT JOIN departments d
+  ON e.dept_id = d.dept_id;
+👉 Charlie shows up with NULL dept.
+
+3. RIGHT JOIN
+Keep all departments, show employees if exists.
+SELECT e.name, d.dept_name
+FROM employees e
+RIGHT JOIN departments d
+  ON e.dept_id = d.dept_id;
+👉 Marketing shows up with NULL employee.
+
+4. FULL OUTER JOIN
+Keep everything from both tables.
+SELECT e.name, d.dept_name
+FROM employees e
+FULL OUTER JOIN departments d
+  ON e.dept_id = d.dept_id;
+
+🔹 Python Loops (Quick Reference with Example)
+For loop
+nums = [1, 2, 3]
+for n in nums:
+    print(n)
+While loop
+i = 0
+while i < 3:
+    print(i)
+    i += 1
+Nested loops
+for i in range(2):        # Outer loop
+    for j in range(2):    # Inner loop
+        print(i, j)
+List comprehension (short form of loop)
+squares = [x*x for x in range(5)]
+print(squares)  # [0, 1, 4, 9, 16]
+
+Q.5 ) It was good, I went through 2 interviews before going for HR round, first one was basic and second one was little difficult to clear,
+I cleared both the rounds and
+got selected for EXL.. Pay is good at EXL, got a lot to learn from here. 
+Interview questions [1] Question 1 Design a pipeline to ingest data from S3
+
+
+High-level pipeline (simple, robust)
+
+Source (S3)
+Files land in a well-known S3 bucket/prefix (e.g. s3://company-raw/app/events/) by producers (app, API, 3rd party).
+Ingest (landing)
+Move/copy files to a controlled landing area (immutable): s3://company-landing/...
+Validate basic things (file size, extension, checksum).
+Use S3 event notifications (SNS/SQS/Lambda) or scheduled job to trigger ingestion.
+Raw storage
+Copy validated files to raw zone (partitioned by date): s3://company-raw/year=2025/month=09/day=20/...
+Keep original file + metadata (producer, arrival_ts, source_path).
+Processing / Bronze → Silver → Gold (mediate transformation layers)
+Bronze: raw data normalized (converted to columnar format e.g. Parquet/Delta), minimal cleansing.
+Silver: deduplication, type casting, basic joins & business logic.
+Gold: aggregated, business-ready tables / materialized views for reporting/ML.
+Metadata / Catalog
+Register tables in the Hive/Glue metastore (or Unity Catalog / Glue Data Catalog) so consumers (Athena/Redshift/Spark) can query.
+Orchestration
+Use Airflow / AWS Step Functions / AWS Glue Workflows / Databricks Jobs to orchestrate steps, retries, dependencies and SLA windows.
+Serving
+Expose curated data to BI (Athena / Redshift / Redshift Spectrum / Databricks SQL) or to ML teams (feature store).
+Monitoring & Observability
+Track: ingestion counts, processing latency, schema changes, failed files.
+Use CloudWatch, Databricks metrics, Prometheus + Grafana, alerting (PagerDuty/Slack).
+Security & Compliance
+Use IAM roles with least privilege, S3 bucket policies, KMS encryption, VPC endpoints for S3, logging (S3 access logs, CloudTrail).
+Data classification, masking for PII.
+Operational concerns
+Idempotency (avoid double-processing): move processed files, tag them, or maintain state (checkpoint table).
+Schema evolution: choose Delta or Glue Schema Registry, enable schema merge carefully.
+Partitioning & compaction: partition by date / key, run compaction for small-file problem.
+Retention & lifecycle: S3 lifecycle rules to move older data to cheaper storage / delete according to policy.
+Batch implementation (PySpark example)
+Short batch job that reads new files from a prefix, writes Delta partitioned by date, and registers table:
+# assume running on Databricks / EMR with AWS credentials via role
+from pyspark.sql import SparkSession
+spark = SparkSession.builder.appName("ingest_s3_batch").getOrCreate()
+input_path = "s3://company-landing/app/events/2025/09/20/"
+delta_output = "s3://company-processed/bronze/events/"
+# Read (auto-detect JSON / CSV / Parquet)
+df = spark.read.option("multiLine","true").json(input_path)   # or .parquet/.csv
+# basic transformations
+from pyspark.sql.functions import current_timestamp, to_date
+df = df.withColumn("ingest_ts", current_timestamp()) \
+       .withColumn("ingest_date", to_date("ingest_ts"))
+# write as Delta, partitioned by date
+(df.write
+   .format("delta")
+   .mode("append")
+   .partitionBy("ingest_date")
+   .save(delta_output))
+# register table in catalog (Glue / Hive / UnityCatalog)
+spark.sql(f"CREATE TABLE IF NOT EXISTS bronze_events USING DELTA LOCATION '{delta_output}'")
+Talk about: run on schedule (e.g., Airflow/Databricks Job), mark processed files or move them to archive/ after success.
+Streaming / near-real-time implementation (Structured Streaming)
+If producers push events continuously, use Spark Structured Streaming reading from S3 is not ideal for true streaming (S3 is object store). 
+Better to use Kinesis/ Kafka for streaming. But if S3 is the ingest point (small-file bursts) you can do micro-batch:
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import current_timestamp, to_date
+spark = SparkSession.builder.getOrCreate()
+# Read new files as a stream from an S3 prefix (Databricks Autoloader / Spark 3.2 / cloud connector)
+df_stream = (spark.readStream
+             .format("cloudFiles")              # Databricks Autoloader
+             .option("cloudFiles.format", "json")
+             .option("cloudFiles.inferColumnTypes", "true")
+             .load("s3://company-landing/app/events/"))
+df_out = df_stream.withColumn("ingest_ts", current_timestamp()) \
+                  .withColumn("ingest_date", to_date("ingest_ts"))
+# write to Delta lake with checkpointing for fault tolerance
+(df_out.writeStream
+      .format("delta")
+      .option("checkpointLocation", "s3://company-checkpoints/events/")
+      .partitionBy("ingest_date")
+      .start("s3://company-processed/bronze/events/"))
+Mention: use Autoloader on Databricks (efficient file discovery) or S3 notifications + Lambda to push to Kinesis if low-latency required.
+Orchestration & metadata flow (concise)
+Trigger: S3 event → SQS → Lambda → kick off Databricks Job or Step Function.
+Or scheduled Airflow DAG: discover new prefixes, submit batch job, validate output, move files to archive/ or error/.\
+Maintain a control table (ingestion_log) with file path, status, start_ts, end_ts, row_count, error_msg — useful for retries & audits.
+Schema, dedupe & idempotency
+Deduplicate using a unique key and MERGE INTO (Delta) for idempotent writes.
+For evolving schema, use Delta’s mergeSchema carefully or use schema registry and explicit migrations.
+Keep raw original files so you can reprocess if logic changes.
+Example MERGE (Delta) for idempotent ingest:
+MERGE INTO bronze_events t
+USING staging_events s
+ON t.event_id = s.event_id
+WHEN MATCHED THEN UPDATE SET *
+WHEN NOT MATCHED THEN INSERT *
+Monitoring & SLOs (what to mention in interview)
+
+
+
+
